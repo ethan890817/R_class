@@ -34,6 +34,9 @@ students$gender <- ifelse(students$gender=="male", "green", "yellow")
 iris$colors <- ifelse(iris$Species=="setosa","purple",ifelse(iris$Species=="versicolor", "blue", "pink"))
 iris$colors
 
-iris[order(-iris$Sepal.Width),]
-versicolor2 <- iris[ve,]
-iris$colors <- NULL
+order <- iris[order(-iris$Sepal.Width),]
+filter.ver <- order$Species=="versicolor"
+versicolor1 <- order[filter.ver,]
+versicolor1$colors <- NULL
+versicolor2 <- order[150,]
+
