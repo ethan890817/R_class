@@ -1,0 +1,57 @@
+---
+title: "practice2.2"
+output: html_document
+date: "2022-09-28"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r,  eval=T}
+
+library(dplyr)
+library(tidyr)
+```
+
+Read rairuoho.txt file.
+```{r,  eval=T}
+
+rairuoho <- read.table("rairuoho.txt", header=T, sep='\t', dec='.')
+head(rairuoho)
+```
+
+Replace nutrient with enriched.
+```{r,  eval=T}
+
+nutrient <- rairuoho$treatment == "nutrient" #find "nutrient" in column of treatment
+rairuoho[nutrient,"treatment"] <- "enriched" #replace "nutrient" with "enriched"
+head(rairuoho)
+```
+
+Replace nutrient with enriched in the data set. Reformat the table in order to have the day as a single variable (factor) containing 6 levels.
+Another variable length will be created to receive the length of the grass at the given day.
+```{r,  eval=T}
+
+rairuoho_day <- rairuoho%>%pivot_longer(day3:day8, names_to = "day", values_to = "length")
+head(rairuoho_day)
+```
+
+Merge variables Spatial1 and Spatial2 in order to obtain the following format for the spatial coordinates of an observation upper_left.
+```{r,  eval=T}
+
+rairuoho_spatial <- rairuoho_day%>%mutate(spatial_coordinates=stringr::str_c(spatial1,spatial2, sep="_"))
+head(rairuoho_spatial)
+```
+
+Remove variables spatial1, spatial, row and column.
+```{r,  eval=T}
+
+rairuoho_remove <- rairuoho_day%>%select(-spatial1,-spatial2,-row,-column)
+head(rairuoho_remove)
+```
+
+```{r,  eval=T}
+
+rairuoho_remove
+```
