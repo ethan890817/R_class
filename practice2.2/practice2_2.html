@@ -444,31 +444,31 @@ head(rairuoho_spatial)</code></pre>
 ## 6        18 paper4 enriched  upper    left         1      1 day8     121 upper_…
 ## # … with abbreviated variable name ¹​spatial_coordinates</code></pre>
 <p>Remove variables spatial1, spatial, row and column.</p>
-<pre class="r"><code>rairuoho_remove &lt;- rairuoho_day%&gt;%select(-spatial1,-spatial2,-row,-column)
+<pre class="r"><code>rairuoho_remove &lt;- rairuoho_spatial%&gt;%select(-spatial1,-spatial2,-row,-column)
 head(rairuoho_remove)</code></pre>
-<pre><code>## # A tibble: 6 × 5
-##   germinate bed    treatment day   length
-##       &lt;int&gt; &lt;chr&gt;  &lt;chr&gt;     &lt;chr&gt;  &lt;int&gt;
-## 1        18 paper4 enriched  day3       2
-## 2        18 paper4 enriched  day4      13
-## 3        18 paper4 enriched  day5      34
-## 4        18 paper4 enriched  day6      85
-## 5        18 paper4 enriched  day7     112
-## 6        18 paper4 enriched  day8     121</code></pre>
+<pre><code>## # A tibble: 6 × 6
+##   germinate bed    treatment day   length spatial_coordinates
+##       &lt;int&gt; &lt;chr&gt;  &lt;chr&gt;     &lt;chr&gt;  &lt;int&gt; &lt;chr&gt;              
+## 1        18 paper4 enriched  day3       2 upper_left         
+## 2        18 paper4 enriched  day4      13 upper_left         
+## 3        18 paper4 enriched  day5      34 upper_left         
+## 4        18 paper4 enriched  day6      85 upper_left         
+## 5        18 paper4 enriched  day7     112 upper_left         
+## 6        18 paper4 enriched  day8     121 upper_left</code></pre>
 <pre class="r"><code>rairuoho_remove</code></pre>
-<pre><code>## # A tibble: 288 × 5
-##    germinate bed    treatment day   length
-##        &lt;int&gt; &lt;chr&gt;  &lt;chr&gt;     &lt;chr&gt;  &lt;int&gt;
-##  1        18 paper4 enriched  day3       2
-##  2        18 paper4 enriched  day4      13
-##  3        18 paper4 enriched  day5      34
-##  4        18 paper4 enriched  day6      85
-##  5        18 paper4 enriched  day7     112
-##  6        18 paper4 enriched  day8     121
-##  7        19 mould1 enriched  day3       5
-##  8        19 mould1 enriched  day4      22
-##  9        19 mould1 enriched  day5      60
-## 10        19 mould1 enriched  day6      95
+<pre><code>## # A tibble: 288 × 6
+##    germinate bed    treatment day   length spatial_coordinates
+##        &lt;int&gt; &lt;chr&gt;  &lt;chr&gt;     &lt;chr&gt;  &lt;int&gt; &lt;chr&gt;              
+##  1        18 paper4 enriched  day3       2 upper_left         
+##  2        18 paper4 enriched  day4      13 upper_left         
+##  3        18 paper4 enriched  day5      34 upper_left         
+##  4        18 paper4 enriched  day6      85 upper_left         
+##  5        18 paper4 enriched  day7     112 upper_left         
+##  6        18 paper4 enriched  day8     121 upper_left         
+##  7        19 mould1 enriched  day3       5 upper_left         
+##  8        19 mould1 enriched  day4      22 upper_left         
+##  9        19 mould1 enriched  day5      60 upper_left         
+## 10        19 mould1 enriched  day6      95 upper_left         
 ## # … with 278 more rows</code></pre>
 
 

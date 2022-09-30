@@ -47,7 +47,7 @@ head(rairuoho_spatial)
 Remove variables spatial1, spatial, row and column.
 ```{r,  eval=T}
 
-rairuoho_remove <- rairuoho_day%>%select(-spatial1,-spatial2,-row,-column)
+rairuoho_remove <- rairuoho_spatial%>%select(-spatial1,-spatial2,-row,-column)
 head(rairuoho_remove)
 ```
 
