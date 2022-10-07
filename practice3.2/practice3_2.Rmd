@@ -1,0 +1,76 @@
+---
+title: "Practice3.2"
+author: "Ethan Wang"
+date: "2022-10-06"
+output: html_document
+---
+# Practice3.2
+
+```{r,  eval=T, include=F}
+
+library(tidyverse)
+```
+### Create the following data frame from scratch.
+```{r,  eval=T}
+
+bubble_tea <- data.frame("before_diet"=c(104L,95L,87L,77L,112L), "after_diet"=c(96L,91L,81L,75L,118L), row.names = c("subject_1", "subject_2", "subject_3", "subject_4", "subject_5"))
+bubble_tea
+```
+### Reformat this data frame to obtain the weight as a double into one column and the time of measurement as a factor with two levels before_diet and after_diet.
+```{r,  eval=T}
+
+bubble_tea$before_diet <- as.double(bubble_tea$before_diet) #convert integer to double
+bubble_tea$after_diet <- as.double(bubble_tea$after_diet)
+bubble_tea_long <- bubble_tea%>%pivot_longer(cols = everything(), names_to = "time_measurement", values_to = "weight") #reformat the data frame to obtain the weight into one column
+bubble_tea_long <- as.data.frame(bubble_tea_long) #convert the tibble object to data frame
+bubble_tea_long$time_measurement <- factor(bubble_tea_long$time_measurement, levels=c('before_diet','after_diet')) #convert time of measurement as factor with two levels
+```
+### Show the results 
+```{r,  eval=T}
+
+typeof(bubble_tea_long$weight) #the numeric type of weight is double
+str(bubble_tea_long)
+```
+### Store this data frame as the first element of a list called BUBBLE_DIET.
+```{r,  eval=T}
+
+BUBBLE_TEA <- list(bubble_tea_long=bubble_tea_long)
+str(BUBBLE_TEA)
+```
+### Create the second element of the list
+```{r,  eval=T}
+
+subject <- c(row.names(bubble_tea)) #a vector of character extracting the row names of the table previously created
+weight_loss <- (bubble_tea$after_diet-bubble_tea$before_diet)/bubble_tea$before_diet*100 # a numeric vector (double) indicating the weight loss (in %) of each subject 
+weight_loss_table <- data.frame(subject, weight_loss) #a combination of these two elements in a table with two columns: subject and weight_loss
+```
+### Show the results
+```{r,  eval=T}
+
+subject
+weight_loss
+weight_loss_table
+```
+### Create another list called WEIGHT_LOSS, storing the three elements.
+```{r,  eval=T}
+
+WEIGHT_LOSS <- list(subject=subject, weight_loss=weight_loss, weight_loss_table=weight_loss_table) #create another list
+str(WEIGHT_LOSS)
+```
+### Put the list WEIGHT_LOSS into the list BUBBLE_TEA.
+```{r,  eval=T}
+
+BUBBLE_TEA[["WEIGHT_LOSS"]] <- WEIGHT_LOSS
+str(BUBBLE_TEA)
+```
+### Create the third element of the list BUBBLE_TEA
+```{r,  eval=T}
+
+enjoyment_R <- 'Learning manipulating data in R is very difficult, but I enjoy the process.' #how much I enjoy manipulating data in R
+BUBBLE_TEA[['enjoyment_R']] <- enjoyment_R #put enjoyment_R into the list BUBBLE_TEA 
+```
+## Show the results of practice3.2.
+```{r,  eval=T}
+
+str(BUBBLE_TEA)
+```
