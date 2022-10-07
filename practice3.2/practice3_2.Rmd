@@ -28,6 +28,7 @@ bubble_tea_long$time_measurement <- factor(bubble_tea_long$time_measurement, lev
 ### Show the results 
 ```{r,  eval=T}
 
+bubble_tea_long
 typeof(bubble_tea_long$weight) #the numeric type of weight is double
 str(bubble_tea_long)
 ```
