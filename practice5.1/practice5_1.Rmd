@@ -1,0 +1,63 @@
+---
+title: "practice5.1"
+author: "Ethan Wang"
+date: "2022-10-21"
+output: html_document
+---
+
+# In the practice5.1, I want to make a map featuring the global distribution of Manta birostris occurrence because manta ray is my favorite marine animal.
+```{r,  eval=T, include=F}
+
+library(leaflet)
+library(rgbif)
+library(tidyverse)
+```
+## First, I need to download the data of Manta birostris occurrence from GBIF website, and reform the gbif form into dataframe.
+```{r,  eval=T}
+
+gbif.manta <- occ_search(scientificName = "Manta birostris", limit = 1200) #Download 1200 records of Manta birostris occurrence.
+gbif.manta.frame <- as.data.frame(gbif.manta$data) #The occurrence data I need is in gbif.manta$data, so transform it to dataframe.
+gbif.manta.frame <- rename(gbif.manta.frame,latitude=decimalLatitude, longitude=decimalLongitude) #rename the columns.
+```
+## Next, I want to show the distribution on the ocean basemap.
+```{r,  eval=T}
+
+global.manta <- leaflet(gbif.manta.frame)%>%
+  addProviderTiles(providers$Esri.OceanBasemap)%>% #Use the Esri.OceanBasemap
+  addCircles(~longitude, ~latitude, popup = gbif.manta.frame) #Add circles to shoe the distribution
+global.manta
+```
+## I also want to use different colors representing the years of the occurrence.
+```{r,  eval=T}
+
+lv.manta <- gbif.manta.frame$year%>%as.factor()
+levels(lv.manta)
+```
+## As level(lv.manta) shows, these data are between 2010 and 2022, so I want to divide them into three groups.
+```{r,  eval=T}
+
+color.manta <- ifelse(gbif.manta.frame$year >=2010 & gbif.manta.frame$year<= 2013,"red",ifelse(gbif.manta.frame$year >= 2014 & gbif.manta.frame$year<= 2017,"green","blue")) #Data between 2010 and 2013 are red, between 2014 and 2017 are green, between 2018 and 2022 are blue.
+lv.color.manta <- color.manta%>%as.factor() 
+```
+## Now, the data on the map are easy to see when they were recorded.
+```{r,  eval=T}
+
+global.manta <- global.manta%>%
+  addCircles(~longitude, ~latitude, popup = gbif.manta.frame,  color = color.manta)%>% #Make different color
+  addLegend("bottomright", colors = levels(lv.color.manta), labels = c("2010~2013","2014~2017","2018~2022"), title = "Years of global Manta birostris occurrence")%>% #Add the legend
+  addMiniMap(tiles = "Esri.OceanBasemap") #Add the mini map
+global.manta
+```
+## In addition, I found there is an organization,Pacific Research Foundation, located in Hawaii and dedicated to research of manta rays, so I want to add the popup of this foundation on the map.
+```{r,  eval=T}
+
+MPRF <- paste(sep = "<br/>", 
+              "<b><a href='https://www.mantapacific.org/home'>Manta Pacific Research Foundation</a></b>",
+              "Kailua-Kona, Hawaii  96745") #Make the information of popup
+global.manta <- global.manta%>%addPopups(-155.0976410330908, 19.848274996428476, popup = MPRF, options = popupOptions(closeButton = T, closeOnClick = F)) #Add the popup on the map
+```
+## The final map I made is showed below.
+```{r,  eval=T}
+
+global.manta
+```
