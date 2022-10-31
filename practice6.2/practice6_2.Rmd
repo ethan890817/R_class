@@ -1,0 +1,67 @@
+---
+title: "Practice6.2"
+author: "Ethan Wang"
+date: "2022-10-31"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r, echo=FALSE}
+library(ggplot2)
+library(gganimate)
+library(animation)
+```
+### This is the function of Lotka-Volterra equations I fix from previous the code provided by professer.
+```{r, echo=TRUE}
+grow_LV<-function(start_1,start_2){
+  num_gen <- 30
+  N1 <- rep(0,num_gen)
+  N2 <- rep(0,num_gen)
+  generation<-1:num_gen
+  growth.rate_1 <- 1.2
+  growth.rate_2 <- 0.7
+  K1<-100
+  K2<-120
+  a12<-0.6
+  a21<-1.2
+  N1[1]<-start_1
+  N2[1]<-start_2
+  for (i in 2:num_gen)  {
+    N1[i] = N1[i-1] + (growth.rate_1* N1[i-1] * ((K1-N1[i-1]-(a12*N2[i-1]))/K1))
+    N2[i] = N2[i-1] + (growth.rate_2 * N2[i-1] * ((K2-N2[i-1]-(a21*N1[i-1]))/K2))
+    generation[1]=1}
+if (N1[1]>0){
+  plot(N1~generation,typ="b",col="blue",ylim=c(0,max(c(K1,K2))),ylab="N")
+}  else {
+  plot(N1~generation,typ="n",ylim=c(0,max(c(K1,K2))),ylab="N")
+}
+    if (N2[1]>0){
+      lines(N2~generation,typ="b",col="red",ylim=c(0,max(c(K1,K2))),ylab="N")
+    }
+}
+```
+### I make three plots representing species 1 alone, species 2 alone and both species competing, respectively. As the third plot showes, the both populations decrease due to competition between two species.
+```{r, echo=TRUE}
+par(mar=c(2,2,2,2),mfrow=c(3,1),las=1)
+ grow_LV(1,0)
+  text(4,110,"Species 1 alone",cex=1.5)
+  
+  grow_LV(0,1)
+  text(4,110,"Species 2 alone",cex=1.5)
+  
+  grow_LV(1,2)
+  text(6,110,"Both Species competing",cex=1.5)
+
+  dev.off()
+```
+### GIF
+```{r, echo=TRUE}
+  saveGIF({
+    for(i in seq(1,5,by=0.5)){
+      grow_LV(i,2*i)
+    }
+  },interval=0.5)
+```  
+![](C:/Users/user/Documents/R語言 週二下午/R_class/practice6.2/animation.gif)
