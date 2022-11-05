@@ -1,0 +1,95 @@
+---
+title: "Practice7.4"
+author: "Ethan Wang"
+date: "2022-11-05"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, echo=FALSE,include=F}
+library(tidyverse)
+```
+## I create my.t.test for my customized t-test function.
+```{r, echo=TRUE}
+my.t.test <- function(x,y){ #this function can only be used to run independent t-test, and assume with equal variance
+  #list the null hypothesis and alternative hypothesis of t-test
+  cat(" ","H0:The true difference between these group means is zero.","\n"," Ha:The true difference is different from zero.","\n")
+  if (is.character(y) == T) { #if one of the object contains the information of two groups, use pivot_wider() first to organize values into two groups
+    xy_df <- data.frame(x,y) 
+    xy_df_wide <- xy_df%>%
+      group_by(y)%>%
+      mutate(row = row_number())%>%
+      pivot_wider(names_from = y, values_from = x)%>%
+      select(-row)
+    xy_df_wide <- as.data.frame(xy_df_wide) #revert it into data frame
+    mean_1 <- mean(xy_df_wide[,1])
+    mean_2 <- mean(xy_df_wide[,2])
+    n1 <- length(xy_df_wide[,1])
+    n2 <- length(xy_df_wide[,2])
+    var_1 <- var(xy_df_wide[,1])
+    var_2 <- var(xy_df_wide[,2])
+    df <- (n1-1)+(n2-1)
+    t <- (mean_1-mean_2)/sqrt((var_1/n1)+(var_2/n2)) #the formula of independent t-test
+    if(t>0){
+      pvalue <- pt(t,df,lower.tail = F)*2 #calculate p-value
+    }else{
+      pvalue <- pt(t,df)*2
+    }
+    if(pvalue < 0.05){
+      cat("  t=",round(t,4)," ","df=",df," ","p-value=",round(pvalue,4),"\n"," Reject H0.")
+    }else{
+      cat("  t=",round(t,4)," ","df=",df," ","p-value=",round(pvalue,4),"\n"," Not reject H0")
+    }
+  }else{ #two objects contain values of two groups respectively
+    mean_x <- mean(x)
+    mean_y <- mean(y)
+    var_x <- var(x)
+    var_y <- var(y)
+    nx <- length(x)
+    ny <- length(y)
+    df <- (nx-1)+(ny-1)
+    t <- (mean_x-mean_y)/sqrt((var_x/nx)+(var_y/ny))
+    if(t>0){
+      pvalue <- pt(t,df,lower.tail = F)*2
+    }else{
+      pvalue <- pt(t,df)*2
+    }
+    if(pvalue < 0.05){
+      cat("  t=",round(t,4)," ","df=",df," ","p-value=",round(pvalue,4),"\n"," Reject H0.")
+    }else{
+      cat("  t=",round(t,4)," ","df=",df," ","p-value=",round(pvalue,4),"\n"," Not reject H0")
+    }
+  }
+}
+```
+## Let's test the effect of treatment on length at various days.
+```{r, echo=TRUE}
+rairuoho <- read.table("rairuoho.txt", header=T, sep="\t", dec='.')
+```
+### At day3, result shows t= -0.6474, p-value= 0.5206 > 0.05, so there is no significant difference between two treatments.
+```{r, echo=TRUE}
+my.t.test(rairuoho$day3,rairuoho$treatment)
+```
+### At day4, result shows t= 0.0387, p-value= 0.9693 > 0.05, so there is no significant difference between two treatments.
+```{r, echo=TRUE}
+my.t.test(rairuoho$day4,rairuoho$treatment)
+```
+### At day5, result shows t= 0.4499, p-value= 0.6549 > 0.05, so there is no significant difference between two treatments.
+```{r, echo=TRUE}
+my.t.test(rairuoho$day5,rairuoho$treatment)
+```
+### At day6, result shows t= 1.2043, p-value= 0.2346 > 0.05, so there is no significant difference between two treatments.
+```{r, echo=TRUE}
+my.t.test(rairuoho$day6,rairuoho$treatment)
+```
+### At day7, result shows t= 2.7786, p-value= 0.0079 < 0.05, so there is a significant difference between two treatments.
+```{r, echo=TRUE}
+my.t.test(rairuoho$day7,rairuoho$treatment)
+```
+### At day8, result shows t= 4.2038, p-value= 1e-04 < 0.05, so there is a significant difference between two treatments.
+```{r, echo=TRUE}
+my.t.test(rairuoho$day8,rairuoho$treatment)
+```
