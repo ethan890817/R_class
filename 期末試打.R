@@ -12,7 +12,8 @@ library(RColorBrewer)
 library(ade4)
 library(factoextra)
 library(magrittr)
-
+library(sp)
+library(rworldmap)
 
 campaign.rqs0.8 <- campaign[which(campaign$rqs>=0.8),]
 campaign.rqs0.8_pivot <- campaign.rqs0.8%>%pivot_wider(id_cols = c(sampleid,x,y),
@@ -154,6 +155,8 @@ ratio.pre.drivers.Asia <- ggplot(data = predominant.drivers.Asia, aes(x=f,y=rati
   labs(x="Predominant drivers",y="Ratio")
 ratio.pre.drivers.Asia
 
+barplot(c(predominant.drivers.SAmerica$ratio,predominant.drivers.Africa$ratio,predominant.drivers.Asia$ratio))
+
 c17 <- c(
   "dodgerblue2", "#E31A1C","green4",
   "#6A3D9A","#FF7F00","black", "gold1",
@@ -186,10 +189,23 @@ architecture.plot <- ggplot(data=world)+
   theme(legend.position = "bottom")
 architecture.plot
 
+control_pivot$region <- ifelse(control_pivot$x>=-120 & control_pivot$x<=-20,"South America",
+                               ifelse(control_pivot$x>=-20 & control_pivot$x<=60,"Africa","Asia"))
+
+#這裡要改
+countries <- function(points)
+{  
+  countriesSP <- getMap(resolution='low')
+  pointsSP = SpatialPoints(points, proj4string=CRS(proj4string(countriesSP)))  
+  indices = over(pointsSP, countriesSP)
+  indices$ADMIN  #returns country name
+}
+points <- data.frame(lon=control_pivot$x,lat=control_pivot$y)
+control_pivot$country <- countries(points)
 presence.pre.drivers <- control_pivot%>%
  mutate(presence=1)%>%
- pivot_wider(id_cols = c(sampleid,x,y),names_from = predominant.driver,values_from = presence)
-presence.pre.drivers[,-(1:3)] <-ifelse(is.na(presence.pre.drivers[,-(1:3)]),0,1)
+ pivot_wider(id_cols = c(sampleid,x,y,region,country),names_from = predominant.driver,values_from = presence)
+presence.pre.drivers[,-(1:5)] <-ifelse(is.na(presence.pre.drivers[,-(1:5)]),0,1)
 #presence.pre.drivers.nmds <- metaMDS(presence.pre.drivers[,-(1:3)],distance = "bray",trymax = 1)
 #plot(presence.pre.drivers.nmds)
 #stressplot(presence.pre.drivers.nmds)
@@ -197,8 +213,7 @@ presence.pre.drivers[,-(1:3)] <-ifelse(is.na(presence.pre.drivers[,-(1:3)]),0,1)
 mds.predominant <- presence.pre.drivers%>%select(-(1:3))%>%
   vegdist(method = "bray")%>%
   cmdscale(eig=T,k=2)
-control_pivot$region <- ifelse(control_pivot$x>=-120 & control_pivot$x<=-20,"South America",
-                               ifelse(control_pivot$x>=-20 & control_pivot$x<=60,"Africa","Asia"))
+
 as.tibble(mds.predominant$points)%>%
   bind_cols(Sample=presence.pre.drivers$sampleid)%>%
   ggplot()+
@@ -209,12 +224,45 @@ predominant.pca1 <- presence.pre.drivers[1:1000, ]%>%select(-(1:3))%>%
 biplot(predominant.pca,scaling = 1)
 biplot(predominant.pca)
 
-predominant.pca2 <- dudi.pca(presence.pre.drivers[-(1:3)],scannf=F,nf=6,scale = F)
-fviz_eig(predominant.pca)
-get_eig(predominant.pca)
-fviz_pca_biplot(predominant.pca,repel = T,habillage=control_pivot$region,
-                alpha.ind=0.5)
+predominant.pca2 <- dudi.pca(presence.pre.drivers[-(1:5)],scannf=F,nf=6,scale = F)
+fviz_eig(predominant.pca2)
+get_eig(predominant.pca2)
+fviz_pca_biplot(predominant.pca2,repel = T,habillage=control_pivot$region,
+                alpha.ind=0.5,addEllipses = T,ellipse.level=0.95,
+                labelsize=3)+
+  theme(text = element_text(size = 7.5),
+        axis.title = element_text(size = 7.5),
+        axis.text = element_text(size = 7.5))
+
+
 
 predominant.pca3 <- dist.binary(presence.pre.drivers[-(1:3)],method = 1)
 predominant.pca3.hc <- hclust(predominant.pca3)
 plot(predominant.pca3.hc)
+
+
+presence.pre.drivers.na.omit <- presence.pre.drivers%>%na.omit(country)
+presence.pre.drivers.countries <- presence.pre.drivers.na.omit%>%
+  group_by(country)%>%
+  summarise(across("Pasture":"Mining and crude oil extraction",.fns=sum))
+#percentage
+presence.pre.drivers.countries[-1] <- presence.pre.drivers.countries[-1]/rowSums(presence.pre.drivers.countries[-1]) 
+countries.continent <- control_pivot%>% #國家跟洲對照表
+  select(country,region)%>%
+  unique()%>%
+  na.omit()%>%
+  arrange(country)
+
+
+predominant.pca4 <- dudi.pca(presence.pre.drivers.countries[,-1],
+                             scannf=F,nf=9,scale = T)
+fviz_eig(predominant.pca4)
+get_eig(predominant.pca4)
+fviz_pca_biplot(predominant.pca4,repel = T,
+                alpha.ind=0.5,label = "var",
+                labelsize=3,habillage = countries.continent$region,
+                addEllipses = T,ellipse.level=0.95)+
+  theme(text = element_text(size = 7.5),
+        axis.title = element_text(size = 7.5),
+        axis.text = element_text(size = 7.5))
+         
