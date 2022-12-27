@@ -198,18 +198,23 @@ mds.predominant <- presence.pre.drivers%>%select(-(1:3))%>%
   vegdist(method = "bray")%>%
   cmdscale(eig=T,k=2)
 control_pivot$region <- ifelse(control_pivot$x>=-120 & control_pivot$x<=-20,"South America",
-                               ifelse(control_pivot$x>=-20 & control_pivot$x<=60,"Arica","Asia"))
+                               ifelse(control_pivot$x>=-20 & control_pivot$x<=60,"Africa","Asia"))
 as.tibble(mds.predominant$points)%>%
   bind_cols(Sample=presence.pre.drivers$sampleid)%>%
   ggplot()+
   geom_point(aes(x=V1,y=V2,col=control_pivot$region))
 
-predominant.pca <- presence.pre.drivers[1:1000, ]%>%select(-(1:3))%>%
+predominant.pca1 <- presence.pre.drivers[1:1000, ]%>%select(-(1:3))%>%
   prcomp(scale=T)
 biplot(predominant.pca,scaling = 1)
 biplot(predominant.pca)
 
-predominant.pca <- dudi.pca(presence.pre.drivers[-(1:3)],scannf=F,nf=6,scale = F)
+predominant.pca2 <- dudi.pca(presence.pre.drivers[-(1:3)],scannf=F,nf=6,scale = F)
 fviz_eig(predominant.pca)
 get_eig(predominant.pca)
-fviz_pca_biplot(predominant.pca,repel = T,habillage=control_pivot$region)
+fviz_pca_biplot(predominant.pca,repel = T,habillage=control_pivot$region,
+                alpha.ind=0.5)
+
+predominant.pca3 <- dist.binary(presence.pre.drivers[-(1:3)],method = 1)
+predominant.pca3.hc <- hclust(predominant.pca3)
+plot(predominant.pca3.hc)
