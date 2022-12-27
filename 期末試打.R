@@ -9,6 +9,10 @@ library(tidyverse)
 library(forcats)
 library(vegan)
 library(RColorBrewer)
+library(ade4)
+library(factoextra)
+library(magrittr)
+
 
 campaign.rqs0.8 <- campaign[which(campaign$rqs>=0.8),]
 campaign.rqs0.8_pivot <- campaign.rqs0.8%>%pivot_wider(id_cols = c(sampleid,x,y),
@@ -31,7 +35,7 @@ predominant.driver <- ggplot(data=world)+
   coord_sf(expand=F)+
   labs(x="Longitude",y="Latitude")+
   geom_point(data=control_pivot,aes(x=x,y=y,colour=factor(predominant.driver)),
-             alpha=0.7)+
+             alpha=0.7,size=0.7)+
   ggtitle("Predominant drivers of global forest loss")+
   scale_color_brewer(name="Predominant drivers",palette= "Set1")+
   theme_bw()+
@@ -40,6 +44,12 @@ predominant.driver <- ggplot(data=world)+
         legend.text = element_text(size=7))
 predominant.driver
 
+x.range.s.America <- c(-120,-20)
+y.range.s.America <- c(-45,40)
+x.range.Africa <- c(-20,55)
+y.range.Africa <- c(-35,23.5)
+x.range.Asia <- c(63,160)
+y.range.Asia <- c(-35,40)
 s.America.predominant.plot <- ggplot(data=world)+  #south America
   geom_sf()+
   coord_sf(xlim=c(-120,-20),ylim=c(-45,40),expand=F)+
@@ -180,6 +190,26 @@ presence.pre.drivers <- control_pivot%>%
  mutate(presence=1)%>%
  pivot_wider(id_cols = c(sampleid,x,y),names_from = predominant.driver,values_from = presence)
 presence.pre.drivers[,-(1:3)] <-ifelse(is.na(presence.pre.drivers[,-(1:3)]),0,1)
-presence.pre.drivers.nmds <- metaMDS(presence.pre.drivers[,-(1:3)],distance = "bray",trymax = 1)
-plot(presence.pre.drivers.nmds)
-stressplot(presence.pre.drivers.nmds)
+#presence.pre.drivers.nmds <- metaMDS(presence.pre.drivers[,-(1:3)],distance = "bray",trymax = 1)
+#plot(presence.pre.drivers.nmds)
+#stressplot(presence.pre.drivers.nmds)
+
+mds.predominant <- presence.pre.drivers%>%select(-(1:3))%>%
+  vegdist(method = "bray")%>%
+  cmdscale(eig=T,k=2)
+control_pivot$region <- ifelse(control_pivot$x>=-120 & control_pivot$x<=-20,"South America",
+                               ifelse(control_pivot$x>=-20 & control_pivot$x<=60,"Arica","Asia"))
+as.tibble(mds.predominant$points)%>%
+  bind_cols(Sample=presence.pre.drivers$sampleid)%>%
+  ggplot()+
+  geom_point(aes(x=V1,y=V2,col=control_pivot$region))
+
+predominant.pca <- presence.pre.drivers[1:1000, ]%>%select(-(1:3))%>%
+  prcomp(scale=T)
+biplot(predominant.pca,scaling = 1)
+biplot(predominant.pca)
+
+predominant.pca <- dudi.pca(presence.pre.drivers[-(1:3)],scannf=F,nf=6,scale = F)
+fviz_eig(predominant.pca)
+get_eig(predominant.pca)
+fviz_pca_biplot(predominant.pca,repel = T,habillage=control_pivot$region)
